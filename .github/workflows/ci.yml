@@ -26,7 +26,7 @@ jobs:
           version: latest
 
       - name: Build
-        run: go build -v -o tool cmd/struct_size_optimizer/main.go
+        run: go build -v -o tool cmd/gosoper/main.go
 
       - name: Test
         run: go test -v -race ./...
