@@ -38,13 +38,13 @@ func buildDiff(oldText, newText string) string {
 		for _, line := range lines {
 			switch d.Type {
 			case diffmatchpatch.DiffEqual:
-				sb.WriteString(fmt.Sprintf("%s%2d   %s\n%s", white, lineNum, line, reset))
+				fmt.Fprintf(&sb, "%s%2d   %s\n%s", white, lineNum, line, reset)
 				lineNum++
 			case diffmatchpatch.DiffDelete:
-				sb.WriteString(fmt.Sprintf("%s%s%s%2d   - %s\n%s", white, bgRed, bold, lineNum, line, reset))
+				fmt.Fprintf(&sb, "%s%s%s%2d   - %s\n%s", white, bgRed, bold, lineNum, line, reset)
 				lineNum++
 			case diffmatchpatch.DiffInsert:
-				sb.WriteString(fmt.Sprintf("%s%s%s     + %s\n%s", white, bold, bgGreen, line, reset))
+				fmt.Fprintf(&sb, "%s%s%s     + %s\n%s", white, bold, bgGreen, line, reset)
 			}
 		}
 	}
