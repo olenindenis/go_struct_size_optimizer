@@ -8,7 +8,7 @@ on:
 
 jobs:
   lint-and-test:
-    name: Lint & Test
+    name: Lint & Build & Test
     runs-on: ubuntu-latest
 
     steps:

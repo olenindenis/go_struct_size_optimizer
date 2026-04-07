@@ -1,4 +1,4 @@
-module github.com/olenindenis/go_struct_size_optimizer
+module github.com/olenindenis/go-struct-size-optimizer
 
 go 1.25.1
 

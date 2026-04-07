@@ -1,8 +1,11 @@
-# GO struct_size_optimizer
+# Go-sopter
 
+[![CI](https://github.com/olenindenis/go-struct-size-optimizer/actions/workflows/ci.yml/badge.svg)](https://github.com/olenindenis/go-struct-size-optimizer/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![Go Reference](https://pkg.go.dev/badge/github.com/olenindenis/go_struct_size_optimizer.svg)](https://pkg.go.dev/github.com/olenindenis/go_struct_size_optimizer)
-[![Go Report Card](https://goreportcard.com/badge/github.com/olenindenis/go-version)](https://goreportcard.com/report/github.com/olenindenis/go_struct_size_optimizer)
+[![Go Reference](https://pkg.go.dev/badge/github.com/olenindenis/go-struct-size-optimizer.svg)](https://pkg.go.dev/github.com/olenindenis/go-struct-size-optimizer)
+[![Go Report Card](https://goreportcard.com/badge/github.com/olenindenis/go-version)](https://goreportcard.com/report/github.com/olenindenis/go-struct-size-optimizer)
+
+## Go-sopter (Golang struct size optimization tool)
 
 A static analysis tool for Go that detects structs with suboptimal field ordering and rewrites them to minimize memory usage through better alignment.
 
@@ -24,26 +27,26 @@ The analyzer (`structalign`) inspects every struct in a Go package and simulates
 ## Installation
 
 ```bash
-go install github.com/olenindenis/go_struct_size_optimizer/cmd/struct_size_optimizer@latest
+go install github.com/olenindenis/go-struct-size-optimizer/cmd/gosoper@latest
 ```
 
 ## Usage
 
 ```bash
 # Analyze packages in the current directory
-struct_size_optimizer
+gosoper
 
 # Analyze a specific directory
-struct_size_optimizer -path /path/to/project
+gosoper -path /path/to/project
 
 # Analyze a specific package pattern within a directory
-struct_size_optimizer -path /path/to/project ./pkg/models/...
+gosoper -path /path/to/project ./pkg/models/...
 
 # Rewrite source files in place (also prints diagnostics)
-struct_size_optimizer -w
+gosoper -w
 
 # Rewrite files in a specific directory
-struct_size_optimizer -path /path/to/project -w
+gosoper -path /path/to/project -w
 ```
 
 **Flags:**
@@ -89,20 +92,24 @@ Running with `-w` rewrites the file **and** prints the same diagnostics so you c
 
 **Hot field example:**
 
-```go
-// Before — flag (hot) buried after large fields
-type Response struct {
-    Body []byte
-    Code int32
-    flag bool
-}
+A field is considered "hot" when its name contains `count`, `flag`, `state`, or `status`. Hot fields are placed first (sorted by alignment descending), followed by the remaining cold fields (also sorted by alignment descending). The reorder is only applied when the resulting struct is strictly smaller.
 
-// After — hot fields first, then sorted by alignment
+```go
+// Before — status (hot, align=8) is buried after a smaller field, causing padding
 type Response struct {
-    flag bool
-    Code int32
-    Body []byte
+    Code   int32  // align=4
+    status int64  // align=8, hot field
+    Done   bool   // align=1
 }
+// Size: 24 bytes (4-byte padding inserted before status)
+
+// After — hot field first eliminates the padding
+type Response struct {
+    status int64  // align=8, hot field
+    Code   int32  // align=4
+    Done   bool   // align=1
+}
+// Size: 16 bytes
 ```
 
 ## Ignore directive
@@ -118,8 +125,21 @@ type LegacyStruct struct {
 }
 ```
 
-## Running tests
+## Development
+
+Requirements: Docker (used by the Makefile targets).
 
 ```bash
-go test ./...
+# Run linter
+make lint
+
+# Run tests
+make test
+```
+
+To run without Docker:
+
+```bash
+go build -v -o tool cmd/gosoper/main.go
+go test -v -race ./...
 ```

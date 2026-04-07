@@ -6,7 +6,7 @@ import (
 	"go/token"
 	"log"
 
-	"github.com/olenindenis/go_struct_size_optimizer/internal/analyzer"
+	"github.com/olenindenis/go-struct-size-optimizer/internal/analyzer"
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/packages"
 )
